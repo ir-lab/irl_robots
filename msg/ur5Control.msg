@@ -1,0 +1,9 @@
+string command
+float32[6] values
+float32 acceleration
+float32 velocity
+float32 time
+float32 blend
+float32 gain
+float32 lookahead
+bool jointcontrol

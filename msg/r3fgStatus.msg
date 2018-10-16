@@ -1,0 +1,8 @@
+bool activationstatus
+uint8 operationstatus
+bool actionstatus
+uint8 gripperstatus
+uint8 motionstatus
+uint8 faultstatus
+r3fgFingerStatus[3] finger
+r3fgFingerStatus scissor

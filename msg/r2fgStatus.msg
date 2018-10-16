@@ -1,0 +1,9 @@
+bool activationstatus
+bool actionstatus
+uint8 gripperstatus
+uint8 objectstatus
+uint8 fault_sw
+uint8 fault_hw
+uint8 position_echo
+uint8 position
+float32 current

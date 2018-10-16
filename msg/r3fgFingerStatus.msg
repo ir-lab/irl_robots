@@ -1,0 +1,4 @@
+uint8 motionstatus
+uint8 positionrequested
+uint8 positionactual
+float32 current

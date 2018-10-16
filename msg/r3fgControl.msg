@@ -1,0 +1,9 @@
+bool activate
+bool go
+uint8 mode
+bool autorelease
+bool glove
+bool individualfinger
+bool individualscissor
+r3fgFingerControl[3] finger
+r3fgFingerControl scissor

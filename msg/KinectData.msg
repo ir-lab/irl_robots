@@ -1,0 +1,13 @@
+float32[3]   spine_mid
+float32[3]   elbow_left
+float32[3]   elbow_right
+float32[3]   hand_left
+float32[3]   hand_right
+float32[3]   shoulder_left
+float32[3]   shoulder_right
+float32[3]   knee_left
+float32[3]   knee_right
+float32[3]   hip_left
+float32[3]   hip_right
+float32[3]   foot_left
+float32[3]   foot_right
