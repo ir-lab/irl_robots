@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(irl_robots)
 
+set(CMAKE_VERBOSE_MAKEFILE on)
+
 add_definitions(-std=c++14)
 
 ## Find catkin macros and libraries
@@ -16,6 +18,15 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
+set(CMAKE_PREFIX_PATH "")
+
+find_library(ur5_virtual_LIBRARIES
+    NAMES remoteApi
+    #PATHS /home/users/jcampbell/V-REP_PRO_EDU_V3_5_0_Linux/programming/aremoteApiBindings/lib/lib/Linux/64Bit
+)
+
+message("HELLOO!")
+message(${ur5_virtual_LIBRARIES})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -206,9 +217,10 @@ include_directories(
 ## Custom ##
 ############
 
-include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${catkin_INCLUDE_DIRS} /home/users/jcampbell/V-REP_PRO_EDU_V3_5_0_Linux/programming/remoteApi /home/users/jcampbell/V-REP_PRO_EDU_V3_5_0_Linux/programming/include)
 
 file(GLOB ur5_SRC "src/ur5/*.cpp")
+file(GLOB ur5_virtual_SRC "src/ur5_virtual/*.cpp")
 file(GLOB r2fg_SRC "src/r2fg/*.cpp")
 file(GLOB r3fg_SRC "src/r3fg/*.cpp")
 file(GLOB ur5_cont_control_SRC "src/ur5_continuous_controller/*.cpp")
@@ -216,6 +228,10 @@ file(GLOB ur5_cont_control_SRC "src/ur5_continuous_controller/*.cpp")
 add_executable(ur5 ${ur5_SRC})
 target_link_libraries(ur5 ${catkin_LIBRARIES})
 add_dependencies(ur5 irl_robots_generate_messages_cpp)
+
+add_executable(ur5_virtual ${ur5_virtual_SRC})
+target_link_libraries(ur5_virtual ${catkin_LIBRARIES} ${ur5_virtual_LIBRARIES})
+add_dependencies(ur5_virtual irl_robots_generate_messages_cpp)
 
 add_executable(r2fg ${r2fg_SRC})
 target_link_libraries(r2fg ${catkin_LIBRARIES})
