@@ -24,6 +24,7 @@ class UR5Network
     static const double INTEGRAL_MAX;
     static const double INTEGRAL_MIN;
     static const double MAX_ACCELERATION;
+    static const double JOINT_OFFSETS[6];
 
     void netMainLoop();
     void sendNextCommand();

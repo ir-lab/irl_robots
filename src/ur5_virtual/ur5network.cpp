@@ -19,6 +19,7 @@ const double UR5Network::MAX_VELOCITY = 2.0; // this
 const double UR5Network::INTEGRAL_MAX = 2.0;
 const double UR5Network::INTEGRAL_MIN = -2.0;
 const double UR5Network::MAX_ACCELERATION = 2.0;
+const double UR5Network::JOINT_OFFSETS[6] = {0.0, -1.5708, 0.0, -1.5708, 0.0, -0.785};
 
 UR5Network::UR5Network(ros::NodeHandle* n) :
     p_ros_node(n),
@@ -142,7 +143,6 @@ void UR5Network::sendNextCommand()
             }
 
             simxSetJointTargetVelocity(m_client_id, m_ur5_joint_handles[i], velocity, simx_opmode_streaming);
-            std::cout << "Setting velocity " << std::endl;
         }
         else
         {
@@ -165,7 +165,7 @@ void UR5Network::readStatus()
         int status = simxGetJointPosition(m_client_id, m_ur5_joint_handles[i], &position, simx_opmode_streaming);
         if(status == simx_return_ok)
         {
-            jmsg.positions[i] = std::fmod(position, 3.14f);
+            jmsg.positions[i] = position + JOINT_OFFSETS[i];
         }
         else
         {
@@ -183,7 +183,10 @@ void UR5Network::readStatus()
         }
     }
 
+    // +1.0052e+0 UR5 Y axis
     // Ignoring the tool status message for now. Don't think anybody is using it.
+    // -7.1526e-7 Floor Y axis
+    // Basically offset of 1.
 
     smsg.mode = 1.0;
 
