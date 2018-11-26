@@ -75,6 +75,13 @@ UR5Network::UR5Network(ros::NodeHandle* n) :
     p_net_thread = new std::thread(&UR5Network::netMainLoop, this);
 }
 
+UR5Network::~UR5Network()
+{
+    simxFinish(m_client_id);
+
+    m_client_id = -1;
+}
+
 void UR5Network::waitForNet()
 {
     p_net_thread->join();

@@ -13,6 +13,8 @@ class UR5Network
 {
   public:
     UR5Network(ros::NodeHandle* n);
+    ~UR5Network();
+    
     void waitForNet();
     void sendCommand(irl_robots::ur5Control com);
 

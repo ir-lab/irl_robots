@@ -18,15 +18,15 @@ find_package(catkin REQUIRED COMPONENTS
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
-set(CMAKE_PREFIX_PATH "")
+#set(CMAKE_PREFIX_PATH "")
 
-find_library(ur5_virtual_LIBRARIES
+find_library(vrep_LIBRARIES
     NAMES remoteApi
-    #PATHS /home/users/jcampbell/V-REP_PRO_EDU_V3_5_0_Linux/programming/aremoteApiBindings/lib/lib/Linux/64Bit
+    PATHS /home/users/jcampbell/V-REP_PRO_EDU_V3_5_0_Linux/programming/remoteApiBindings/lib/lib/Linux/64Bit
 )
 
 message("HELLOO!")
-message(${ur5_virtual_LIBRARIES})
+message(${vrep_LIBRARIES})
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -224,13 +224,14 @@ file(GLOB ur5_virtual_SRC "src/ur5_virtual/*.cpp")
 file(GLOB r2fg_SRC "src/r2fg/*.cpp")
 file(GLOB r3fg_SRC "src/r3fg/*.cpp")
 file(GLOB ur5_cont_control_SRC "src/ur5_continuous_controller/*.cpp")
+file(GLOB football_virtual_SRC "src/football_virtual/*.cpp")
 
 add_executable(ur5 ${ur5_SRC})
 target_link_libraries(ur5 ${catkin_LIBRARIES})
 add_dependencies(ur5 irl_robots_generate_messages_cpp)
 
 add_executable(ur5_virtual ${ur5_virtual_SRC})
-target_link_libraries(ur5_virtual ${catkin_LIBRARIES} ${ur5_virtual_LIBRARIES})
+target_link_libraries(ur5_virtual ${catkin_LIBRARIES} ${vrep_LIBRARIES})
 add_dependencies(ur5_virtual irl_robots_generate_messages_cpp)
 
 add_executable(r2fg ${r2fg_SRC})
@@ -244,3 +245,7 @@ add_dependencies(r3fg irl_robots_generate_messages_cpp)
 add_executable(ur5_cont_control ${ur5_cont_control_SRC})
 target_link_libraries(ur5_cont_control ${catkin_LIBRARIES})
 add_dependencies(ur5_cont_control irl_robots_generate_messages_cpp)
+
+add_executable(football_virtual ${football_virtual_SRC})
+target_link_libraries(football_virtual ${catkin_LIBRARIES} ${vrep_LIBRARIES})
+add_dependencies(football_virtual irl_robots_generate_messages_cpp)
