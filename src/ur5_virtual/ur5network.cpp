@@ -190,10 +190,14 @@ void UR5Network::readStatus()
         }
     }
 
-    // +1.0052e+0 UR5 Y axis
-    // Ignoring the tool status message for now. Don't think anybody is using it.
-    // -7.1526e-7 Floor Y axis
-    // Basically offset of 1.
+    float world_position[3] = {0.0, 0.0, 0.0};
+    int status = simxGetObjectPosition(m_client_id, m_ur5_tool_handle, -1, world_position, simx_opmode_streaming);
+    if(status == simx_return_ok)
+    {
+        tmsg.position[0] = world_position[0];
+        tmsg.position[1] = world_position[1];
+        tmsg.position[2] = world_position[2];
+    }
 
     smsg.mode = 1.0;
 
