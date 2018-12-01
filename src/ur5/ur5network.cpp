@@ -7,21 +7,28 @@
 #include <irl_robots/ur5Tool.h>
 #include <irl_robots/ur5Status.h>
 
-//const double UR5Network::PROPORTIONAL_GAIN = 2.5;
-const double UR5Network::PROPORTIONAL_GAIN = 5.0;
-const double UR5Network::INTEGRAL_GAIN = 0.01;
-const double UR5Network::DIFFERENTIAL_GAIN = 10.0;
-const double UR5Network::MAX_VELOCITY = 2.0; // this
-const double UR5Network::INTEGRAL_MAX = 2.0;
-const double UR5Network::INTEGRAL_MIN = -2.0;
-const double UR5Network::MAX_ACCELERATION = 2.0;
-
 UR5Network::UR5Network(ros::NodeHandle* n) :
   p_ros_node(n),
   p_net_socket(-1),
   p_integral_state{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
   p_differential_state{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
 {
+    XmlRpc::XmlRpcValue param_list;
+    if(n->getParam("control", param_list))
+    {
+        m_p_gain = param_list["ur5"]["p_gain"];
+        m_i_gain = param_list["ur5"]["i_gain"];
+        m_d_gain = param_list["ur5"]["d_gain"];
+        m_max_velocity = param_list["ur5"]["max_velocity"];
+        m_i_max = param_list["ur5"]["max_i"];
+        m_i_min = param_list["ur5"]["min_i"];
+        m_max_accel = param_list["ur5"]["max_acceleration"];
+    }
+    else
+    {
+        throw std::invalid_argument("Missing \"control\" ROS parameters for UR5. Please set them and re-run.");
+    }
+
   p_pub_joint  = p_ros_node->advertise<irl_robots::ur5Joints>("/ur5/joints", 1);
   p_pub_tool   = p_ros_node->advertise<irl_robots::ur5Tool>  ("/ur5/tool",   1);
   p_pub_status = p_ros_node->advertise<irl_robots::ur5Status>("/ur5/status", 1);
@@ -132,29 +139,29 @@ void UR5Network::sendNextCommand()
       p_integral_state[i] += error;
 
       // Min/max bounds prevent integral windup.
-      if(p_integral_state[i] > INTEGRAL_MAX)
+      if(p_integral_state[i] > m_i_max)
       {
-          p_integral_state[i] = INTEGRAL_MAX;
+          p_integral_state[i] = m_i_max;
       }
-      else if(p_integral_state[i] < INTEGRAL_MIN)
+      else if(p_integral_state[i] < m_i_min)
       {
-          p_integral_state[i] = INTEGRAL_MIN;
+          p_integral_state[i] = m_i_min;
       }
 
       double velocity =
-        (error * PROPORTIONAL_GAIN) +
-        (p_integral_state[i] * INTEGRAL_GAIN) +
-        ((error - p_differential_state[i]) * DIFFERENTIAL_GAIN);
+        (error * m_p_gain) +
+        (p_integral_state[i] * m_i_gain) +
+        ((error - p_differential_state[i]) * m_d_gain);
 
       p_differential_state[i] = error;
 
       if(velocity > 0.0)
       {
-        velocity = std::min(MAX_VELOCITY, velocity);
+        velocity = std::min(m_max_velocity, velocity);
       }
       else
       {
-        velocity = std::max(-MAX_VELOCITY, velocity);
+        velocity = std::max(-m_max_velocity, velocity);
       }
 
       //std::cout << "| " << velocity;
@@ -186,7 +193,7 @@ void UR5Network::sendNextCommand()
   }
   else if(p_com_queue.front().command == "speedj")
   {
-    p_com_queue.front().acceleration = MAX_ACCELERATION;
+    p_com_queue.front().acceleration = m_max_accel;
     command += "," + std::to_string(p_com_queue.front().acceleration);
     command += "," + std::to_string(p_com_queue.front().time);
   }

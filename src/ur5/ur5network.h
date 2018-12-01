@@ -18,14 +18,6 @@ class UR5Network
     void sendCommand(irl_robots::ur5Control com);
 
   private:
-    static const double PROPORTIONAL_GAIN;
-    static const double INTEGRAL_GAIN;
-    static const double DIFFERENTIAL_GAIN;
-    static const double MAX_VELOCITY;
-    static const double INTEGRAL_MAX;
-    static const double INTEGRAL_MIN;
-    static const double MAX_ACCELERATION;
-
     template <typename t>
     void swapByteorder(t* value)
     {
@@ -53,6 +45,14 @@ class UR5Network
     std::mutex p_com_mutex;
     double p_ur5_mode;
     irl_robots::ur5Joints p_ur5_currjoints;
+
+    double m_p_gain;
+    double m_i_gain;
+    double m_d_gain;
+    double m_max_velocity;
+    double m_i_max;
+    double m_i_min;
+    double m_max_accel;
 
     double p_integral_state[6];
     double p_differential_state[6];
