@@ -20,9 +20,11 @@ find_package(catkin REQUIRED COMPONENTS
 
 #set(CMAKE_PREFIX_PATH "")
 
+set(VREP_PATH "$ENV{HOME}/V-REP_PRO_EDU_V3_5_0_Linux")
+
 find_library(vrep_LIBRARIES
     NAMES remoteApi
-    PATHS /home/users/jcampbell/V-REP_PRO_EDU_V3_5_0_Linux/programming/remoteApiBindings/lib/lib/Linux/64Bit
+    PATHS ${VREP_PATH}/programming/remoteApiBindings/lib/lib/Linux/64Bit
 )
 
 message("HELLOO!")
@@ -217,7 +219,7 @@ include_directories(
 ## Custom ##
 ############
 
-include_directories(include ${catkin_INCLUDE_DIRS} /home/users/jcampbell/V-REP_PRO_EDU_V3_5_0_Linux/programming/remoteApi /home/users/jcampbell/V-REP_PRO_EDU_V3_5_0_Linux/programming/include)
+include_directories(include ${catkin_INCLUDE_DIRS} ${VREP_PATH}/programming/remoteApi ${VREP_PATH}/programming/include)
 
 file(GLOB ur5_SRC "src/ur5/*.cpp")
 file(GLOB ur5_virtual_SRC "src/ur5_virtual/*.cpp")

@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cstring>
+#include <stdexcept>
 
 #include <irl_robots/ur5Tool.h>
 #include <irl_robots/ur5Status.h>
@@ -58,8 +59,7 @@ UR5Network::UR5Network(ros::NodeHandle* n) :
         if(status != simx_return_ok)
         {
             std::cout << "Failed to retrieve the UR5 virtual object." << std::endl;
-            std::cout << "Status: " << status << std::endl;
-            std::cout << "Handle: " << m_ur5_handle << std::endl;
+            throw std::runtime_error("Failed to retrieve the UR5 virtual object.");
         }
         else
         {
@@ -71,6 +71,7 @@ UR5Network::UR5Network(ros::NodeHandle* n) :
                 if(status != simx_return_ok)
                 {
                     std::cout << "Failed to retrieve UR5 virtual joint handle." << std::endl;
+                    throw std::runtime_error("Failed to retrieve UR5 virtual joint handle.");
                 }
             }
 
@@ -79,15 +80,24 @@ UR5Network::UR5Network(ros::NodeHandle* n) :
             if(status != simx_return_ok)
             {
                 std::cout << "Failed to retrieve UR5 virtual tool handle." << std::endl;
+                throw std::runtime_error("Failed to retrieve UR5 virtual tool handle.");
             }
         }
     }
+    else
+    {
+        throw std::runtime_error("Failed to connect to the V-REP remote API server.");
+    }
+
+    simxStopSimulation(m_client_id, simx_opmode_oneshot);
+    simxStartSimulation(m_client_id, simx_opmode_oneshot);
 
     p_net_thread = new std::thread(&UR5Network::netMainLoop, this);
 }
 
 UR5Network::~UR5Network()
 {
+    simxStopSimulation(m_client_id, simx_opmode_oneshot);
     simxFinish(m_client_id);
 
     m_client_id = -1;
