@@ -1,0 +1,3 @@
+r2fg: {port: /dev/ttyUSB0}
+r3fg: {ip: 192.168.1.11, port: 502, refreshrate: 30}
+ur5: {ip: localhost, port: 30003}
