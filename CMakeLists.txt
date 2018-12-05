@@ -20,7 +20,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 #set(CMAKE_PREFIX_PATH "")
 
-set(VREP_PATH "$ENV{HOME}/V-REP_PRO_EDU_V3_5_0_Linux")
+set(VREP_PATH "$ENV{HOME}/Share/V-REP_PRO_EDU_V3_5_0_Linux")
 
 find_library(vrep_LIBRARIES
     NAMES remoteApi

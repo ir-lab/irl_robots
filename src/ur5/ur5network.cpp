@@ -281,6 +281,7 @@ void UR5Network::parseStatus(char* buffer)
   memcpy(tmsg.rotation.data(),   buffer + 58 * sizeof(double), 3 * sizeof(double));
   memcpy(tmsg.velocities.data(), buffer + 61 * sizeof(double), 6 * sizeof(double));
   memcpy((void*)&smsg.mode,      buffer + 94 * sizeof(double), 1 * sizeof(double));
+  memcpy((void*)&smsg.safety_mode,      buffer + 101 * sizeof(double), 1 * sizeof(double));
 
   for(auto i = 0; i < 6; i++)
   {
@@ -294,6 +295,7 @@ void UR5Network::parseStatus(char* buffer)
     }
   }
   swapByteorder<double>(&smsg.mode);
+  swapByteorder<double>(&smsg.safety_mode);
 
   p_pub_status.publish(smsg);
   p_pub_joint.publish(jmsg);
