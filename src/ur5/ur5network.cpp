@@ -195,7 +195,7 @@ void UR5Network::sendNextCommand()
   {
     p_com_queue.front().acceleration = m_max_accel;
     command += "," + std::to_string(p_com_queue.front().acceleration);
-    command += "," + std::to_string(p_com_queue.front().time);
+    //command += "," + std::to_string(p_com_queue.front().time);
   }
   else
   {
