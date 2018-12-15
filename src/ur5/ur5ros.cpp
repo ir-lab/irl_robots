@@ -43,9 +43,8 @@ bool UR5Ros::callbackControlService(irl_robots::ur5SrvControlRequest& req, irl_r
   p_ur5_com->sendCommand(c);
 
   int rate = 2;
-  ros::Rate loop_rate(rate);
+  ros::WallRate loop_rate(rate);
   for(int i = 0; i < ceil(req.time * rate); i++)
     loop_rate.sleep();
   return true;
 }
-

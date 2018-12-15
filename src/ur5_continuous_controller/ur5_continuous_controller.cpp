@@ -54,7 +54,7 @@ void Ur5ContinuousController::ur5_state_callback(const irl_robots::ur5Joints::Co
 
 void Ur5ContinuousController::control_robot()
 {
-    ros::Rate rate(m_controlFrequency);
+    ros::WallRate rate(m_controlFrequency);
 
     while(ros::ok())
     {

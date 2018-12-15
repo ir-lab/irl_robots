@@ -118,7 +118,7 @@ void UR5Network::netMainLoop()
 {
     ROS_INFO("Launching Network main loop");
 
-    ros::Rate loop_rate(100);
+    ros::WallRate loop_rate(100);
     while(ros::ok())
     {
         sendNextCommand();
