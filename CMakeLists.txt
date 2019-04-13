@@ -27,9 +27,6 @@ find_library(vrep_LIBRARIES
     PATHS ${VREP_PATH}/programming/remoteApiBindings/lib/lib/Linux/64Bit
 )
 
-message("HELLOO!")
-message(${vrep_LIBRARIES})
-
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
@@ -72,10 +69,7 @@ add_message_files(
   r3fgControl.msg
   r2fgStatus.msg
   r2fgControl.msg
-  KinectData.msg
   gSimpleControl.msg
-  matrix.msg
-  row.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -222,19 +216,13 @@ include_directories(
 include_directories(include ${catkin_INCLUDE_DIRS} ${VREP_PATH}/programming/remoteApi ${VREP_PATH}/programming/include)
 
 file(GLOB ur5_SRC "src/ur5/*.cpp")
-file(GLOB ur5_virtual_SRC "src/ur5_virtual/*.cpp")
 file(GLOB r2fg_SRC "src/r2fg/*.cpp")
 file(GLOB r3fg_SRC "src/r3fg/*.cpp")
 file(GLOB ur5_cont_control_SRC "src/ur5_continuous_controller/*.cpp")
-file(GLOB football_virtual_SRC "src/football_virtual/*.cpp")
 
 add_executable(ur5 ${ur5_SRC})
 target_link_libraries(ur5 ${catkin_LIBRARIES})
 add_dependencies(ur5 irl_robots_generate_messages_cpp)
-
-add_executable(ur5_virtual ${ur5_virtual_SRC})
-target_link_libraries(ur5_virtual ${catkin_LIBRARIES} ${vrep_LIBRARIES})
-add_dependencies(ur5_virtual irl_robots_generate_messages_cpp)
 
 add_executable(r2fg ${r2fg_SRC})
 target_link_libraries(r2fg ${catkin_LIBRARIES})
@@ -248,6 +236,17 @@ add_executable(ur5_cont_control ${ur5_cont_control_SRC})
 target_link_libraries(ur5_cont_control ${catkin_LIBRARIES})
 add_dependencies(ur5_cont_control irl_robots_generate_messages_cpp)
 
-add_executable(football_virtual ${football_virtual_SRC})
-target_link_libraries(football_virtual ${catkin_LIBRARIES} ${vrep_LIBRARIES})
-add_dependencies(football_virtual irl_robots_generate_messages_cpp)
+if(${vrep_LIBRARIES})
+    file(GLOB ur5_virtual_SRC "src/ur5_virtual/*.cpp")
+    file(GLOB football_virtual_SRC "src/football_virtual/*.cpp")
+
+    add_executable(ur5_virtual ${ur5_virtual_SRC})
+    target_link_libraries(ur5_virtual ${catkin_LIBRARIES} ${vrep_LIBRARIES})
+    add_dependencies(ur5_virtual irl_robots_generate_messages_cpp)
+
+    add_executable(football_virtual ${football_virtual_SRC})
+    target_link_libraries(football_virtual ${catkin_LIBRARIES} ${vrep_LIBRARIES})
+    add_dependencies(football_virtual irl_robots_generate_messages_cpp)
+else()
+    message("Skipping build of virtual robot interfaces as VREP has not been found.")
+endif()
