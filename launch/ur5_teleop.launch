@@ -1,0 +1,11 @@
+<launch>
+    <param name="/joy_node/dev" value="/dev/input/js0"/>
+
+    <rosparam command="load" file="$(find irl_robots)/param/config.yaml"/>
+    <!--<rosparam command="load" file="$(find irl_robots)/param/virtual_config.yaml"/>-->
+    <rosparam command="load" file="$(find interaction_core)/param/interaction.yaml"/>
+
+    <node name="joy_node" pkg="joy" type="joy_node"/>
+    <node name="ur5_node" pkg="irl_robots" type="ur5"/>
+    <node name="ur5_teleop_node" pkg="irl_robots" type="ur5_teleop.py" output="screen"/>
+</launch>
