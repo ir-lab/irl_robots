@@ -1,0 +1,7 @@
+<launch>
+    <rosparam command="load" file="$(find irl_robots)/param/config.yaml"/>
+    <rosparam command="load" file="$(find interaction_core)/param/interaction.yaml"/>
+
+    <!--<node name="kinect_skeleton_tracking_node" pkg="kinect_listen_driver" type="kinect_listen_driver_node" output="screen"/>-->
+    <node name="baxter_teleop_node" pkg="irl_robots" type="baxter_teleop.py" output="screen"/>
+</launch>
