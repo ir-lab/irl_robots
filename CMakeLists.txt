@@ -70,6 +70,8 @@ add_message_files(
   r2fgStatus.msg
   r2fgControl.msg
   gSimpleControl.msg
+  rows.msg
+  matrix.msg
 )
 
 ## Generate services in the 'srv' folder
