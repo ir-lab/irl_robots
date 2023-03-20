@@ -14,15 +14,16 @@ UR5Network::UR5Network(ros::NodeHandle* n) :
   p_differential_state{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
 {
     XmlRpc::XmlRpcValue param_list;
-    if(n->getParam("control", param_list))
+    if(n->getParam("ur5", param_list))
     {
-        m_p_gain = param_list["ur5"]["p_gain"];
-        m_i_gain = param_list["ur5"]["i_gain"];
-        m_d_gain = param_list["ur5"]["d_gain"];
-        m_max_velocity = param_list["ur5"]["max_velocity"];
-        m_i_max = param_list["ur5"]["max_i"];
-        m_i_min = param_list["ur5"]["min_i"];
-        m_max_accel = param_list["ur5"]["max_acceleration"];
+        m_p_gain       = param_list["control_params"]["p_gain"];
+        m_i_gain       = param_list["control_params"]["i_gain"];
+        m_d_gain       = param_list["control_params"]["d_gain"];
+        m_max_velocity = param_list["control_params"]["m_max_velocity"];
+        m_i_max        = param_list["control_params"]["m_i_max"];
+        m_i_min        = param_list["control_params"]["m_i_min"];
+        m_max_accel    = param_list["control_params"]["m_max_accel"];
+        state_size     = param_list["state_size"];
     }
     else
     {
@@ -109,6 +110,21 @@ void UR5Network::sendNextCommand()
 {
   std::lock_guard<std::mutex> lock(p_com_mutex);
 
+  // dynamic parameter update
+  XmlRpc::XmlRpcValue param_list;
+  if(p_ros_node->getParam("ur5", param_list))
+    {
+        m_p_gain       = param_list["control_params"]["p_gain"];
+        m_i_gain       = param_list["control_params"]["i_gain"];
+        m_d_gain       = param_list["control_params"]["d_gain"];
+        m_max_velocity = param_list["control_params"]["m_max_velocity"];
+        m_i_max        = param_list["control_params"]["m_i_max"];
+        m_i_min        = param_list["control_params"]["m_i_min"];
+        m_max_accel    = param_list["control_params"]["m_max_accel"];
+        state_size     = param_list["state_size"];
+    }
+
+
   if(p_com_queue.size() == 0)
     return;
 
@@ -129,7 +145,7 @@ void UR5Network::sendNextCommand()
   command += "[";
 
   //std::cout << "Velocity ";
-
+  
   for(auto i = 0; i < 6; i ++)
   {
     if(p_com_queue.front().command == "speedj")
@@ -170,11 +186,82 @@ void UR5Network::sendNextCommand()
 //      std::cout << i << " " << actual_velocity << " " << (p_com_queue.front().values[i] - p_ur5_currjoints.positions[i]) / (double)floor(1.0 / p_com_queue.front().time) << " | ";
       //      command += std::to_string((p_com_queue.front().values[i] - p_ur5_currjoints.positions[i]) / (double)floor(1.0 / p_com_queue.front().time)); // carrot
     }
+
+    else if (p_com_queue.front().command == "speedl")
+    {
+      if (i<3){
+        double error = p_com_queue.front().values[i] - p_ur5_currTool.position[i];
+        p_tool_integral_state[i] += error;
+
+        // Min/max bounds prevent integral windup.
+        if(p_tool_integral_state[i] > m_i_max)
+          {
+              p_tool_integral_state[i] = m_i_max;
+          }
+        else if(p_tool_integral_state[i] < m_i_min)
+          {
+              p_tool_integral_state[i] = m_i_min;
+          }
+
+        double velocity = (error * m_p_gain) +
+                          (p_tool_integral_state[i] * m_i_gain) +
+                          ((error - p_tool_differential_state[i]) * m_d_gain);
+
+         p_tool_differential_state[i] = error;
+
+          if(velocity > 0.0)
+          {
+            velocity = std::min(m_max_velocity, velocity);
+          }
+          else
+          {
+            velocity = std::max(-m_max_velocity, velocity);
+          }
+          command += std::to_string(velocity);
+
+        }
+      else{
+
+        // double error = p_com_queue.front().values[i] - p_ur5_currTool.rotation[i-3];
+        double error = 0.0;
+        p_tool_integral_state[i] += error;
+
+        // Min/max bounds prevent integral windup.
+        if(p_tool_integral_state[i] > m_i_max)
+          {
+              p_tool_integral_state[i] = m_i_max;
+          }
+        else if(p_tool_integral_state[i] < m_i_min)
+          {
+              p_tool_integral_state[i] = m_i_min;
+          }
+
+        double velocity = (error * m_p_gain) +
+                          (p_tool_integral_state[i] * m_i_gain) +
+                          ((error - p_tool_differential_state[i]) * m_d_gain);
+
+         p_tool_differential_state[i] = error;
+
+          if(velocity > 0.0)
+          {
+            velocity = std::min(m_max_velocity, velocity);
+          }
+          else
+          {
+            velocity = std::max(-m_max_velocity, velocity);
+          }
+          command += std::to_string(velocity);
+
+        }
+    }
+    
+   
     else
       command += std::to_string(p_com_queue.front().values[i]);
-    if(i < 5)
-      command += ",";
-  }
+
+      if(i < 5)
+        command += ",";
+    }
   //std::cout << std::endl;
 
   command += "]";
@@ -189,14 +276,24 @@ void UR5Network::sendNextCommand()
   {
     command += ",t=" + std::to_string(p_com_queue.front().time);
     command += ",lookahead_time=" + std::to_string(p_com_queue.front().acceleration);
-    command += ",gain=" + std::to_string(p_com_queue.front().velocity);
+    command += ",gain=" + std::to_string(p_com_queue.front().gain);
   }
-  else if(p_com_queue.front().command == "speedj")
+  else if(p_com_queue.front().command == "speedj" or p_com_queue.front().command == "speedl")
   {
     p_com_queue.front().acceleration = m_max_accel;
     command += "," + std::to_string(p_com_queue.front().acceleration);
     //command += "," + std::to_string(p_com_queue.front().time);
   }
+  else if(p_com_queue.front().command == "stopj")
+  {
+    if(p_com_queue.front().acceleration > 0.0) {
+      command = "stopj("+std::to_string(p_com_queue.front().acceleration);
+    }
+    else {
+      command = "stopj(0.7";
+    }
+  }
+
   else
   {
     ROS_ERROR("Command %s is not implemented", p_com_queue.front().command.c_str());
@@ -207,6 +304,11 @@ void UR5Network::sendNextCommand()
 
   p_com_queue.pop();
 
+  // debug msg
+  ROS_INFO("p_gain: %f", m_p_gain);
+  ROS_INFO("i_gain: %f", m_i_gain);
+  ROS_INFO("d_gain: %f", m_d_gain);
+  ROS_INFO("Sending command: %s", command.c_str());
   for(auto i = 0; i < strlen(command.c_str());)
   {
     int sds = send(p_net_socket, command.c_str() + i, strlen(command.c_str()) - i, 0);
@@ -222,7 +324,7 @@ void UR5Network::sendNextCommand()
 
 void UR5Network::readStatus()
 {
-  char buffer[1056];
+  char buffer[state_size-4];
   int size = 0;
   for(auto i = 0; i < sizeof(int);)
   {
@@ -243,15 +345,15 @@ void UR5Network::readStatus()
 
   swapByteorder<int>(&size);
 
-  if(size != 1060)
+  if(size != state_size)
   {
     ROS_ERROR("UR5 state size is %d, but 1060 expected.", size);
     std::exit(1);
   }
 
-  for(auto i = 0; i < 1056;)
+  for(auto i = 0; i < (state_size-4);)
   {
-    int rvs = recv(p_net_socket, buffer + i, 1056 - i, 0);
+    int rvs = recv(p_net_socket, buffer + i, (state_size-4) - i, 0);
     if(rvs < 0)
     {
       ROS_ERROR("Communication error with UR5");
@@ -303,4 +405,5 @@ void UR5Network::parseStatus(char* buffer)
 
   p_ur5_mode = smsg.mode;
   p_ur5_currjoints = jmsg;
+  p_ur5_currTool = tmsg;
 }

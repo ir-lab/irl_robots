@@ -8,6 +8,8 @@
 #include <mutex>
 #include <irl_robots/ur5Control.h>
 #include <irl_robots/ur5Joints.h>
+#include <irl_robots/ur5Tool.h>
+
 #include <algorithm>
 
 class UR5Network
@@ -45,6 +47,7 @@ class UR5Network
     std::mutex p_com_mutex;
     double p_ur5_mode;
     irl_robots::ur5Joints p_ur5_currjoints;
+    irl_robots::ur5Tool p_ur5_currTool;
 
     double m_p_gain;
     double m_i_gain;
@@ -53,9 +56,14 @@ class UR5Network
     double m_i_max;
     double m_i_min;
     double m_max_accel;
-
+    int state_size;
+    
     double p_integral_state[6];
     double p_differential_state[6];
+
+    double p_tool_integral_state[6];
+    double p_tool_differential_state[6];
+
 };
 
 #endif // UR5NETWORK_H
