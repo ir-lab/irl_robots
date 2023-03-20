@@ -1,0 +1,20 @@
+ur5:
+  control_params:
+    p_gain: 2.0
+    i_gain: 0.0
+    d_gain: 0.0
+    m_max_velocity: 3.14
+    m_i_max:  0.5
+    m_i_min: -0.5
+    m_max_accel: 3.14
+  state_size: 1108
+  ip: "192.168.1.103"
+  port: 30003
+
+r2fg:
+  port: /dev/ttyUSB0
+
+r3fg:
+  ip: "192.168.1.11"
+  port: 502 
+  refreshrate: 30

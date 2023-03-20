@@ -1,0 +1,4 @@
+<launch>
+    <rosparam command="load" file="$(find irl_robots)/param/general_params.yaml"/>
+    <node name="ur5_node" pkg="irl_robots" type="ur5"/>
+</launch>
